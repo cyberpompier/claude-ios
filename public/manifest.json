@@ -1,0 +1,51 @@
+{
+  "name": "iOS18 Inspired PWA",
+  "short_name": "iOS18 PWA",
+  "description": "Une application web progressive avec un design inspiré d'iOS18",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#007AFF",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot1.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    },
+    {
+      "src": "/screenshot2.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Accueil",
+      "url": "/",
+      "icons": [{ "src": "/shortcut-home.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Notifications",
+      "url": "/?tab=notifications",
+      "icons": [{ "src": "/shortcut-notifications.png", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "categories": ["productivity", "utilities"]
+}

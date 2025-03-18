@@ -3,14 +3,14 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import Content from './components/Content';
 import GeolocationPage from './components/GeolocationPage';
+import LocationHistory from './components/LocationHistory';
 
 function App() {
   const [isInstallPromptShown, setIsInstallPromptShown] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('home');
-  const [showGeolocation, setShowGeolocation] = useState(false);
+  const [currentPage, setCurrentPage] = useState('home');
 
-  // Register service worker for PWA functionality
   useEffect(() => {
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -24,13 +24,9 @@ function App() {
       });
     }
 
-    // Handle PWA install prompt
     window.addEventListener('beforeinstallprompt', (e) => {
-      // Prevent Chrome 67 and earlier from automatically showing the prompt
       e.preventDefault();
-      // Stash the event so it can be triggered later
       setDeferredPrompt(e);
-      // Show install prompt after a delay
       setTimeout(() => {
         if (!isInstallPromptShown) {
           setIsInstallPromptShown(true);
@@ -49,17 +45,14 @@ function App() {
     setIsInstallPromptShown(false);
     
     if (deferredPrompt) {
-      // Show the install prompt
       deferredPrompt.prompt();
       
-      // Wait for the user to respond to the prompt
       deferredPrompt.userChoice.then((choiceResult: { outcome: string }) => {
         if (choiceResult.outcome === 'accepted') {
           console.log('User accepted the install prompt');
         } else {
           console.log('User dismissed the install prompt');
         }
-        // Clear the saved prompt since it can't be used again
         setDeferredPrompt(null);
       });
     }
@@ -67,26 +60,32 @@ function App() {
 
   const handleTabChange = (tab: string) => {
     if (tab === 'apps') {
-      setShowGeolocation(true);
+      setCurrentPage('geolocation');
     } else {
       setActiveTab(tab);
+      setCurrentPage('home');
+    }
+  };
+
+  const renderCurrentPage = () => {
+    switch (currentPage) {
+      case 'geolocation':
+        return <GeolocationPage onBack={() => setCurrentPage('home')} />;
+      case 'history':
+        return <LocationHistory onBack={() => setCurrentPage('home')} />;
+      case 'home':
+      default:
+        return <Content />;
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {showGeolocation ? (
-        <GeolocationPage onBack={() => setShowGeolocation(false)} />
-      ) : (
-        <>
-          <Header />
-          <Content />
-          <Footer activeTab={activeTab} onTabChange={handleTabChange} />
-        </>
-      )}
+      <Header />
+      {renderCurrentPage()}
+      <Footer activeTab={activeTab} onTabChange={handleTabChange} />
       
-      {/* PWA Install Prompt */}
-      {isInstallPromptShown && !showGeolocation && (
+      {isInstallPromptShown && currentPage === 'home' && (
         <div className="fixed bottom-20 left-4 right-4 bg-white rounded-2xl shadow-lg p-4 z-50 flex items-center">
           <div className="mr-4 bg-gradient-to-br from-blue-400 to-blue-600 w-12 h-12 rounded-xl flex items-center justify-center text-white text-xl">
             📱

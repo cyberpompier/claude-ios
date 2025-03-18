@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Navigation, ArrowLeft, RefreshCw } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface Coordinates {
   latitude: number;
@@ -14,14 +15,24 @@ interface LocationInfo {
   distance?: number;
 }
 
+interface LocationRecord {
+  id?: number;
+  created_at?: string;
+  latitude: number;
+  longitude: number;
+  address?: string;
+  city?: string;
+  distance?: number;
+}
+
 const GeolocationPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [coordinates, setCoordinates] = useState<Coordinates | null>(null);
   const [locationInfo, setLocationInfo] = useState<LocationInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [referenceAddress] = useState("5 avenue de la gare, noyon, france");
   
-  // Coordonnées approximatives de Noyon, France (pour la référence)
   const referenceCoordinates = {
     latitude: 49.5811,
     longitude: 3.0014
@@ -30,6 +41,7 @@ const GeolocationPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const getLocation = () => {
     setLoading(true);
     setError(null);
+    setSaveStatus(null);
     
     if (!navigator.geolocation) {
       setError("La géolocalisation n'est pas prise en charge par votre navigateur");
@@ -42,7 +54,6 @@ const GeolocationPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const { latitude, longitude } = position.coords;
         setCoordinates({ latitude, longitude });
         
-        // Calculer la distance par rapport à l'adresse de référence
         const distance = calculateDistance(
           latitude, 
           longitude, 
@@ -50,7 +61,6 @@ const GeolocationPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           referenceCoordinates.longitude
         );
         
-        // Simuler une recherche d'adresse inverse (normalement on utiliserait une API comme OpenStreetMap Nominatim)
         setTimeout(() => {
           setLocationInfo({
             address: "Votre position actuelle",
@@ -87,9 +97,8 @@ const GeolocationPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     );
   };
   
-  // Calculer la distance entre deux points en km (formule de Haversine)
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-    const R = 6371; // Rayon de la Terre en km
+    const R = 6371;
     const dLat = deg2rad(lat2 - lat1);
     const dLon = deg2rad(lon2 - lon1);
     const a = 
@@ -97,12 +106,44 @@ const GeolocationPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
       Math.sin(dLon/2) * Math.sin(dLon/2); 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-    const distance = R * c; // Distance en km
-    return Math.round(distance * 10) / 10; // Arrondi à 1 décimale
+    const distance = R * c;
+    return Math.round(distance * 10) / 10;
   };
   
   const deg2rad = (deg: number): number => {
     return deg * (Math.PI/180);
+  };
+
+  const saveLocationToSupabase = async () => {
+    if (!coordinates || !locationInfo) return;
+
+    setSaveStatus('saving');
+    
+    try {
+      const locationData: LocationRecord = {
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
+        address: locationInfo.address,
+        city: locationInfo.city,
+        distance: locationInfo.distance
+      };
+
+      const { data, error } = await supabase
+        .from('locations')
+        .insert([locationData])
+        .select();
+
+      if (error) {
+        console.error('Error saving location:', error);
+        setSaveStatus('error');
+      } else {
+        console.log('Location saved:', data);
+        setSaveStatus('success');
+      }
+    } catch (err) {
+      console.error('Exception saving location:', err);
+      setSaveStatus('error');
+    }
   };
   
   useEffect(() => {
@@ -110,7 +151,7 @@ const GeolocationPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   }, []);
   
   return (
-    <div className="h-full flex flex-col bg-gray-50">
+    <div className="flex-1 overflow-auto">
       <div className="bg-white/80 backdrop-blur-xl border-b border-gray-200 h-14 flex items-center px-4">
         <button 
           onClick={onBack}
@@ -131,7 +172,7 @@ const GeolocationPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         </button>
       </div>
       
-      <div className="flex-1 overflow-auto p-4">
+      <div className="p-4">
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden mb-6">
           <div className="p-4 border-b border-gray-100">
             <h2 className="text-lg font-semibold mb-1">Adresse de référence</h2>
@@ -181,7 +222,7 @@ const GeolocationPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 </div>
                 
                 {locationInfo?.distance !== undefined && (
-                  <div className="bg-gray-100 rounded-xl p-4">
+                  <div className="bg-gray-100 rounded-xl p-4 mb-4">
                     <div className="flex items-start">
                       <div className="bg-green-500 w-10 h-10 rounded-full flex items-center justify-center text-white mr-3">
                         <Navigation size={20} />
@@ -193,6 +234,31 @@ const GeolocationPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         </p>
                       </div>
                     </div>
+                  </div>
+                )}
+
+                <button 
+                  onClick={saveLocationToSupabase}
+                  disabled={loading || saveStatus === 'saving'}
+                  className="w-full bg-ios-blue text-white font-medium py-3 rounded-xl mb-4 flex items-center justify-center"
+                >
+                  {saveStatus === 'saving' ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                      Enregistrement...
+                    </>
+                  ) : 'Enregistrer ma position'}
+                </button>
+
+                {saveStatus === 'success' && (
+                  <div className="bg-green-50 text-green-600 p-3 rounded-xl mb-4 text-center">
+                    Position enregistrée avec succès!
+                  </div>
+                )}
+
+                {saveStatus === 'error' && (
+                  <div className="bg-red-50 text-red-600 p-3 rounded-xl mb-4 text-center">
+                    Erreur lors de l'enregistrement. Veuillez réessayer.
                   </div>
                 )}
               </>
@@ -211,7 +277,7 @@ const GeolocationPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               Cette fonctionnalité utilise l'API Geolocation de votre navigateur pour déterminer votre position actuelle.
             </p>
             <p className="text-gray-600 text-sm mb-3">
-              Aucune donnée de localisation n'est stockée sur nos serveurs. Toutes les informations restent sur votre appareil.
+              Les données de localisation sont stockées dans une base de données Supabase sécurisée.
             </p>
             <p className="text-gray-600 text-sm">
               La précision peut varier en fonction de votre appareil et de votre environnement.

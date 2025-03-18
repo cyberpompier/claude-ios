@@ -61,7 +61,6 @@ const Content: React.FC = () => {
   const renderHomeTab = () => (
     <>
       <section className="mb-8">
-        <h2 className="text-2xl font-semibold mb-4">Bienvenue sur iOS18 PWA</h2>
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
           <img 
             src="https://images.unsplash.com/photo-1588345921523-c2dcdb7f1dcd?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" 
@@ -219,29 +218,8 @@ const Content: React.FC = () => {
   };
 
   return (
-    <main className="flex-1 pt-16 pb-16 overflow-auto">
+    <main className="flex-1 pt-20 pb-16 overflow-auto">
       <div className="max-w-4xl mx-auto px-4 py-6">
-        <div className="mb-6 bg-white/70 backdrop-blur-md rounded-full p-1 flex justify-between shadow-sm">
-          <button 
-            className={`flex-1 py-2 px-4 rounded-full text-sm font-medium ${activeTab === 'home' ? 'bg-ios-blue text-white' : 'text-gray-600'}`}
-            onClick={() => setActiveTab('home')}
-          >
-            Accueil
-          </button>
-          <button 
-            className={`flex-1 py-2 px-4 rounded-full text-sm font-medium ${activeTab === 'feed' ? 'bg-ios-blue text-white' : 'text-gray-600'}`}
-            onClick={() => setActiveTab('feed')}
-          >
-            Fil d'actualité
-          </button>
-          <button 
-            className={`flex-1 py-2 px-4 rounded-full text-sm font-medium ${activeTab === 'notifications' ? 'bg-ios-blue text-white' : 'text-gray-600'}`}
-            onClick={() => setActiveTab('notifications')}
-          >
-            Notifications
-          </button>
-        </div>
-        
         {renderContent()}
       </div>
     </main>

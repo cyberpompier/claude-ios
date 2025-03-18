@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Home, Search, Bell, Settings, Layers } from 'lucide-react';
+import React from 'react';
+import { Home, Search, Heart, User, Grid } from 'lucide-react';
 
 interface FooterProps {
   activeTab: string;
@@ -8,41 +8,45 @@ interface FooterProps {
 
 const Footer: React.FC<FooterProps> = ({ activeTab, onTabChange }) => {
   return (
-    <footer className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-gray-200 h-16 flex items-center justify-around z-20">
+    <footer className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-gray-200 h-16 flex items-center justify-around px-2 z-10">
       <button 
-        className={`p-2 rounded-full transition-colors flex flex-col items-center ${activeTab === 'home' ? 'text-ios-blue' : 'text-gray-600 hover:bg-gray-100'}`}
         onClick={() => onTabChange('home')}
+        className={`flex flex-col items-center justify-center w-16 h-14 rounded-xl ${activeTab === 'home' ? 'text-ios-blue' : 'text-gray-500'}`}
       >
         <Home size={24} />
         <span className="text-xs mt-1">Accueil</span>
       </button>
+      
       <button 
-        className={`p-2 rounded-full transition-colors flex flex-col items-center ${activeTab === 'discover' ? 'text-ios-blue' : 'text-gray-600 hover:bg-gray-100'}`}
-        onClick={() => onTabChange('discover')}
+        onClick={() => onTabChange('search')}
+        className={`flex flex-col items-center justify-center w-16 h-14 rounded-xl ${activeTab === 'search' ? 'text-ios-blue' : 'text-gray-500'}`}
       >
         <Search size={24} />
-        <span className="text-xs mt-1">Découvrir</span>
+        <span className="text-xs mt-1">Recherche</span>
       </button>
+      
       <button 
-        className={`p-2 rounded-full transition-colors flex flex-col items-center ${activeTab === 'apps' ? 'text-ios-blue' : 'text-gray-600 hover:bg-gray-100'}`}
         onClick={() => onTabChange('apps')}
+        className={`flex flex-col items-center justify-center w-16 h-14 rounded-xl ${activeTab === 'apps' ? 'text-ios-blue' : 'text-gray-500'}`}
       >
-        <Layers size={24} />
+        <Grid size={24} />
         <span className="text-xs mt-1">Apps</span>
       </button>
+      
       <button 
-        className={`p-2 rounded-full transition-colors flex flex-col items-center ${activeTab === 'notifications' ? 'text-ios-blue' : 'text-gray-600 hover:bg-gray-100'}`}
-        onClick={() => onTabChange('notifications')}
+        onClick={() => onTabChange('favorites')}
+        className={`flex flex-col items-center justify-center w-16 h-14 rounded-xl ${activeTab === 'favorites' ? 'text-ios-blue' : 'text-gray-500'}`}
       >
-        <Bell size={24} />
-        <span className="text-xs mt-1">Notifications</span>
+        <Heart size={24} />
+        <span className="text-xs mt-1">Favoris</span>
       </button>
+      
       <button 
-        className={`p-2 rounded-full transition-colors flex flex-col items-center ${activeTab === 'settings' ? 'text-ios-blue' : 'text-gray-600 hover:bg-gray-100'}`}
-        onClick={() => onTabChange('settings')}
+        onClick={() => onTabChange('profile')}
+        className={`flex flex-col items-center justify-center w-16 h-14 rounded-xl ${activeTab === 'profile' ? 'text-ios-blue' : 'text-gray-500'}`}
       >
-        <Settings size={24} />
-        <span className="text-xs mt-1">Réglages</span>
+        <User size={24} />
+        <span className="text-xs mt-1">Profil</span>
       </button>
     </footer>
   );
